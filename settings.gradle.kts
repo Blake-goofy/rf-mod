@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "WhmKeyboardToggle"
+rootProject.name = "KeyboardToggle"
 include(":app")

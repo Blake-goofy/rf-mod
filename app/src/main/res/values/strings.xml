@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WHM Keyboard Toggle</string>
-    <string name="accessibility_service_label">WHM Keyboard Toggle Service</string>
+    <string name="app_name">Keyboard Toggle</string>
+    <string name="accessibility_service_label">Keyboard Toggle Service</string>
     <string name="accessibility_service_description">Lets a hardware shortcut toggle the soft keyboard inside the current foreground app.</string>
 </resources>

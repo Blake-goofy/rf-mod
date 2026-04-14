@@ -1,4 +1,4 @@
-# WHM Keyboard Toggle Plan
+# Keyboard Toggle Plan
 
 ## What this app does
 
@@ -8,7 +8,8 @@ The service works like this:
 
 1. If the keyboard window is already visible, it sends `BACK` only in that case, so it hides the IME without navigating away when the IME is not open.
 2. If the keyboard is hidden, it finds the currently focused editable field and clicks or taps that field to bring the IME up.
-3. It forces `SHOW_MODE_IGNORE_HARD_KEYBOARD` so Android is willing to show the soft keyboard even on rugged hardware that may report a physical keyboard.
+3. If the shortcut activity briefly steals focus and the live accessibility node is no longer available, it can safely fall back to the last known editable field coordinates, but only when the same foreground app is still active.
+4. It forces `SHOW_MODE_IGNORE_HARD_KEYBOARD` so Android is willing to show the soft keyboard even on rugged hardware that may report a physical keyboard.
 
 This approach is required on Android 13 because a normal background app cannot reliably call `InputMethodManager.showSoftInput(...)` into another app's focused window.
 
@@ -38,25 +39,49 @@ Because this machine does not have Gradle or an Android SDK configured, the repo
 ## Device setup
 
 1. On the TC8300, open `Settings` -> `Accessibility`.
-2. Find `WHM Keyboard Toggle Service` and turn it on.
+2. Find `Keyboard Toggle Service` and turn it on.
 3. Confirm the accessibility permission prompt.
-4. Open WHM and place the cursor in a text field.
-5. In Zebra's button mapping tool, map `GRIP_TRIGGER_2` to launch the `WHM Keyboard Toggle` app shortcut.
+4. Open any app and place the cursor in a normal text field.
+5. In Zebra's button mapping tool, map `GRIP_TRIGGER_2` to launch the `Keyboard Toggle` app shortcut.
 6. Press the trigger.
    - First press when a text field is active: keyboard should open.
    - Next press while keyboard is visible: keyboard should hide.
-   - WHM should remain the foreground app after the helper activity finishes.
+   - The foreground app should remain in place after the helper activity finishes.
 
 ## Expected limitations
 
 - If the accessibility service is disabled, the shortcut will do nothing.
-- If WHM renders its input area in a custom surface or other accessibility-invisible control, the service may not be able to find the active text field. In that case, the next fallback would be a device-specific coordinate tap strategy.
+- If an app renders its input area in a custom surface or other accessibility-invisible control, the service may not be able to find the active text field. In that case, the next fallback would be a device-specific coordinate tap strategy.
 - The helper intentionally does not open the keyboard when no editable field is available, because blindly sending `BACK` or arbitrary taps would be risky in a warehouse workflow.
+
+## Debug logging
+
+The app writes useful events to Android logcat with these tags:
+
+- `KeyboardToggleSvc`
+- `TriggerProxyActivity`
+
+The app also mirrors those entries into a plain text file on the device:
+
+- `Downloads/KeyboardToggle/keyboard-toggle.log`
+
+Examples:
+
+- `adb logcat -s KeyboardToggleSvc TriggerProxyActivity`
+- `adb logcat | findstr /I "KeyboardToggleSvc TriggerProxyActivity"`
 
 ## First test checklist
 
 1. Install and enable the accessibility service.
-2. Open WHM.
+2. Open an app with a normal text field.
 3. Tap into a normal text field.
 4. Press `GRIP_TRIGGER_2`.
-5. Verify that the IME opens and closes without leaving WHM.
+5. Verify that the IME opens and closes without leaving the current app.
+
+Use this to build debug
+
+```powershell
+ $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
+>> $env:Path = "$env:JAVA_HOME\bin;$env:Path"
+>> .\gradlew.bat assembleDebug --console=plain --no-daemon
+```

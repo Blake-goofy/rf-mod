@@ -2,14 +2,15 @@ package com.bbecker.whmkeyboardtoggle
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 
 class TriggerProxyActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!KeyboardToggleAccessibilityService.requestToggle()) {
-            Log.w(TAG, "Accessibility service is not connected; enable it in Settings before testing.")
+        if (KeyboardToggleAccessibilityService.requestToggle()) {
+            AppLogger.i(this, TAG, "Forwarded toggle request to the accessibility service.")
+        } else {
+            AppLogger.w(this, TAG, "Accessibility service is not connected; enable it in Settings before testing.")
         }
 
         finish()
