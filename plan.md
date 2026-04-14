@@ -1,0 +1,62 @@
+# WHM Keyboard Toggle Plan
+
+## What this app does
+
+This project creates a tiny Android app whose launcher activity has no visible UI. When Zebra launches that shortcut, the activity immediately exits and asks an always-enabled accessibility service to toggle the soft keyboard inside the current foreground app.
+
+The service works like this:
+
+1. If the keyboard window is already visible, it sends `BACK` only in that case, so it hides the IME without navigating away when the IME is not open.
+2. If the keyboard is hidden, it finds the currently focused editable field and clicks or taps that field to bring the IME up.
+3. It forces `SHOW_MODE_IGNORE_HARD_KEYBOARD` so Android is willing to show the soft keyboard even on rugged hardware that may report a physical keyboard.
+
+This approach is required on Android 13 because a normal background app cannot reliably call `InputMethodManager.showSoftInput(...)` into another app's focused window.
+
+## Files in this repo
+
+- `app/src/main/java/com/bbecker/whmkeyboardtoggle/TriggerProxyActivity.kt`: no-UI shortcut entry point.
+- `app/src/main/java/com/bbecker/whmkeyboardtoggle/KeyboardToggleAccessibilityService.kt`: background accessibility service that toggles the IME.
+- `app/src/main/res/xml/keyboard_toggle_accessibility_service.xml`: accessibility service capabilities.
+- `app/src/main/AndroidManifest.xml`: app and service registration.
+
+## Manual build and install
+
+Because this machine does not have Gradle or an Android SDK configured, the repo currently contains the project source but not a built APK. For a single-device test, do this manually:
+
+1. Install Android Studio on your Windows machine if it is not already installed.
+2. Open this repo folder in Android Studio.
+3. Let Android Studio install the required SDK pieces when prompted.
+   - Install at least Android SDK Platform 34.
+   - Use the bundled JDK that ships with Android Studio.
+4. Build the debug APK.
+   - Menu: `Build` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
+5. Connect the Zebra TC8300 with USB debugging enabled.
+6. Install the APK.
+   - Android Studio can install directly with `Run`.
+   - Or use `adb install -r app\build\outputs\apk\debug\app-debug.apk`.
+
+## Device setup
+
+1. On the TC8300, open `Settings` -> `Accessibility`.
+2. Find `WHM Keyboard Toggle Service` and turn it on.
+3. Confirm the accessibility permission prompt.
+4. Open WHM and place the cursor in a text field.
+5. In Zebra's button mapping tool, map `GRIP_TRIGGER_2` to launch the `WHM Keyboard Toggle` app shortcut.
+6. Press the trigger.
+   - First press when a text field is active: keyboard should open.
+   - Next press while keyboard is visible: keyboard should hide.
+   - WHM should remain the foreground app after the helper activity finishes.
+
+## Expected limitations
+
+- If the accessibility service is disabled, the shortcut will do nothing.
+- If WHM renders its input area in a custom surface or other accessibility-invisible control, the service may not be able to find the active text field. In that case, the next fallback would be a device-specific coordinate tap strategy.
+- The helper intentionally does not open the keyboard when no editable field is available, because blindly sending `BACK` or arbitrary taps would be risky in a warehouse workflow.
+
+## First test checklist
+
+1. Install and enable the accessibility service.
+2. Open WHM.
+3. Tap into a normal text field.
+4. Press `GRIP_TRIGGER_2`.
+5. Verify that the IME opens and closes without leaving WHM.
