@@ -1,0 +1,45 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Release APK (debug-signed)",
+			"type": "process",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$env:JAVA_HOME='C:\\Program Files\\Android\\Android Studio\\jbr'; $sdkRoot='C:\\Users\\bbecker\\AppData\\Local\\Android\\Sdk'; $buildTools=Get-ChildItem \"$sdkRoot\\build-tools\" -Directory | Sort-Object Name -Descending | Select-Object -First 1; $apksigner=Join-Path $buildTools.FullName 'apksigner.bat'; $unsigned='.\\app\\build\\outputs\\apk\\release\\app-release-unsigned.apk'; $signed='.\\app\\build\\outputs\\apk\\release\\app-release-debugsigned.apk'; & .\\gradlew.bat assembleRelease --console=plain --no-daemon; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & $apksigner sign --ks \"$HOME\\.android\\debug.keystore\" --ks-pass pass:android --ks-key-alias androiddebugkey --key-pass pass:android --out $signed $unsigned; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & $apksigner verify --verbose $signed"
+			],
+			"options": {
+				"env": {
+					"JAVA_HOME": "C:\\Program Files\\Android\\Android Studio\\jbr"
+				}
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Build Debug APK",
+			"type": "process",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$env:JAVA_HOME='C:\\Program Files\\Android\\Android Studio\\jbr'; & .\\gradlew.bat assembleDebug --console=plain --no-daemon"
+			],
+			"options": {
+				"env": {
+					"JAVA_HOME": "C:\\Program Files\\Android\\Android Studio\\jbr"
+				}
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

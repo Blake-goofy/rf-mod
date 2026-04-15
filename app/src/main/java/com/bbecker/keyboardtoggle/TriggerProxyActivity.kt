@@ -1,6 +1,7 @@
 package com.bbecker.whmkeyboardtoggle
 
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 
 class TriggerProxyActivity : Activity() {
@@ -13,12 +14,22 @@ class TriggerProxyActivity : Activity() {
         }
 
         finish()
-        overridePendingTransition(0, 0)
+        suppressTransitionAnimation()
     }
 
     override fun onResume() {
         super.onResume()
         finish()
+        suppressTransitionAnimation()
+    }
+
+    private fun suppressTransitionAnimation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+            return
+        }
+
+        @Suppress("DEPRECATION")
         overridePendingTransition(0, 0)
     }
 

@@ -719,7 +719,7 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
         private const val TOGGLE_DELAY_MS = 300L
         private const val REFOCUS_SHOW_DELAY_MS = 120L
         private const val DIAGNOSTIC_SNAPSHOT_DELAY_MS = 500L
-        private const val ENABLE_DIAGNOSTICS = BuildConfig.DEBUG
+        private val ENABLE_DIAGNOSTICS = BuildConfig.DEBUG
         private const val MAX_LOG_TEXT_LENGTH = 80
         private const val MAX_TREE_DEPTH = 5
         private const val MAX_TREE_NODE_LOGS = 80

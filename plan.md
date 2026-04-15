@@ -81,10 +81,26 @@ Examples:
 4. Press `GRIP_TRIGGER_2`.
 5. Verify that the IME opens and closes without leaving the current app.
 
-Use this to build debug
-
+Use this to build debug:
 ```powershell
- $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
->> $env:Path = "$env:JAVA_HOME\bin;$env:Path"
->> .\gradlew.bat assembleDebug --console=plain --no-daemon
+$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+.\gradlew.bat assembleDebug --console=plain --no-daemon
 ```
+
+Use this to build an installable release-variant APK for local testing:
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+$sdkRoot = 'C:\Users\bbecker\AppData\Local\Android\Sdk'
+$buildTools = Get-ChildItem "$sdkRoot\build-tools" -Directory | Sort-Object Name -Descending | Select-Object -First 1
+$apksigner = Join-Path $buildTools.FullName 'apksigner.bat'
+$unsigned = '.\app\build\outputs\apk\release\app-release-unsigned.apk'
+$signed = '.\app\build\outputs\apk\release\app-release-debugsigned.apk'
+.\gradlew.bat assembleRelease --console=plain --no-daemon
+& $apksigner sign --ks "$HOME\.android\debug.keystore" --ks-pass pass:android --ks-key-alias androiddebugkey --key-pass pass:android --out $signed $unsigned
+```
+
+That produces `app\\build\\outputs\\apk\\release\\app-release-debugsigned.apk`.
+
+`assembleRelease` by itself only produces `app-release-unsigned.apk`, which is not installable until it is signed.
