@@ -1,0 +1,2 @@
+-keep class com.bbecker.whmkeyboardtoggle.TriggerProxyActivity { *; }
+-keep class com.bbecker.whmkeyboardtoggle.KeyboardToggleAccessibilityService { *; }

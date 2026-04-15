@@ -40,6 +40,7 @@ Because this machine does not have Gradle or an Android SDK configured, the repo
 
 1. On the TC8300, open `Settings` -> `Accessibility`.
 2. Find `Keyboard Toggle Service` and turn it on.
+   - This is required because the accessibility service performs the cross-app keyboard toggle.
 3. Confirm the accessibility permission prompt.
 4. Open any app and place the cursor in a normal text field.
 5. In Zebra's button mapping tool, map `GRIP_TRIGGER_2` to launch the `Keyboard Toggle` app shortcut.
@@ -56,14 +57,16 @@ Because this machine does not have Gradle or an Android SDK configured, the repo
 
 ## Debug logging
 
-The app writes useful events to Android logcat with these tags:
+Debug builds write useful events to Android logcat with these tags:
 
 - `KeyboardToggleSvc`
 - `TriggerProxyActivity`
 
-The app also mirrors those entries into a plain text file on the device:
+Debug builds also mirror those entries into a plain text file on the device:
 
 - `Downloads/KeyboardToggle/keyboard-toggle.log`
+
+Release builds are intended to stay silent and do not write routine logs or the device log file.
 
 Examples:
 

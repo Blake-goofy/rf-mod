@@ -7,10 +7,9 @@ class TriggerProxyActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (KeyboardToggleAccessibilityService.requestToggle()) {
-            AppLogger.i(this, TAG, "Forwarded toggle request to the accessibility service.")
-        } else {
-            AppLogger.w(this, TAG, "Accessibility service is not connected; enable it in Settings before testing.")
+        val toggleAccepted = KeyboardToggleAccessibilityService.requestToggle()
+        if (!toggleAccepted && BuildConfig.DEBUG) {
+            AppLogger.w(this, TAG, "Accessibility service is not connected.")
         }
 
         finish()

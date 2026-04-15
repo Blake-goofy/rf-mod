@@ -38,7 +38,7 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
                     hideKeyboard()
                 } else {
                     AppLogger.i(this, TAG, "Skipped BACK because the pending hide request found the keyboard already hidden.")
-                    postDiagnosticSnapshot("hide-already-satisfied")
+                    postHideVerification("hide-already-satisfied")
                 }
             }
             ToggleMode.SHOW -> showKeyboard()
@@ -138,7 +138,7 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
     private fun hideKeyboard() {
         if (performGlobalAction(GLOBAL_ACTION_BACK)) {
             AppLogger.i(this, TAG, "Requested BACK to hide the visible IME.")
-            postDiagnosticSnapshot("after-hide-request") {
+            postHideVerification("after-hide-request") {
                 reconcileKeyboardVisibilityAfterHideRequest()
             }
         } else {
@@ -248,12 +248,31 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
     }
 
     private fun postDiagnosticSnapshot(label: String, afterSnapshot: (() -> Unit)? = null) {
+        if (!ENABLE_DIAGNOSTICS) {
+            afterSnapshot?.invoke()
+            return
+        }
+
         mainHandler.postDelayed(
             {
                 logWindowSnapshot(label)
                 afterSnapshot?.invoke()
                 logNodeSnapshot("focused-input:$label", findFocus(AccessibilityNodeInfo.FOCUS_INPUT))
                 logFocusedContext(label)
+            },
+            DIAGNOSTIC_SNAPSHOT_DELAY_MS,
+        )
+    }
+
+    private fun postHideVerification(label: String, afterVerification: (() -> Unit)? = null) {
+        if (ENABLE_DIAGNOSTICS) {
+            postDiagnosticSnapshot(label, afterVerification)
+            return
+        }
+
+        mainHandler.postDelayed(
+            {
+                afterVerification?.invoke()
             },
             DIAGNOSTIC_SNAPSHOT_DELAY_MS,
         )
@@ -274,6 +293,10 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
     }
 
     private fun logWindowSnapshot(label: String) {
+        if (!ENABLE_DIAGNOSTICS) {
+            return
+        }
+
         val activePackage = resolveActiveAppPackageName().orEmpty()
         AppLogger.i(this, TAG, "Window snapshot [$label]: activeApp=$activePackage windowCount=${windows.size}")
 
@@ -294,6 +317,10 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
     }
 
     private fun logNodeSnapshot(label: String, node: AccessibilityNodeInfo?) {
+        if (!ENABLE_DIAGNOSTICS) {
+            return
+        }
+
         if (node == null) {
             AppLogger.i(this, TAG, "Node snapshot [$label]: none")
             return
@@ -309,6 +336,10 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
     }
 
     private fun logFocusedContext(label: String) {
+        if (!ENABLE_DIAGNOSTICS) {
+            return
+        }
+
         val focusedNode = findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
         if (focusedNode == null) {
             AppLogger.i(this, TAG, "Focused context [$label]: no focused input node")
@@ -327,6 +358,10 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
     }
 
     private fun logAncestorChain(label: String, node: AccessibilityNodeInfo) {
+        if (!ENABLE_DIAGNOSTICS) {
+            return
+        }
+
         var current: AccessibilityNodeInfo? = node
         var depth = 0
         while (current != null && depth < MAX_ANCESTOR_DEPTH) {
@@ -343,6 +378,10 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
     }
 
     private fun logNodeSubtree(label: String, root: AccessibilityNodeInfo) {
+        if (!ENABLE_DIAGNOSTICS) {
+            return
+        }
+
         val remainingBudget = intArrayOf(MAX_TREE_NODE_LOGS)
         logNodeSubtreeRecursive(label, root, 0, remainingBudget)
     }
@@ -353,6 +392,10 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
         depth: Int,
         remainingBudget: IntArray,
     ) {
+        if (!ENABLE_DIAGNOSTICS) {
+            return
+        }
+
         if (remainingBudget[0] <= 0) {
             return
         }
@@ -382,6 +425,10 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
     }
 
     private fun logAccessibilityEvent(event: AccessibilityEvent) {
+        if (!ENABLE_DIAGNOSTICS) {
+            return
+        }
+
         val eventPackageName = event.packageName?.toString().orEmpty()
         val shouldLog = eventPackageName.isNotEmpty() && !isOwnPackagePackageName(eventPackageName)
         if (!shouldLog) {
@@ -672,6 +719,7 @@ class KeyboardToggleAccessibilityService : AccessibilityService() {
         private const val TOGGLE_DELAY_MS = 300L
         private const val REFOCUS_SHOW_DELAY_MS = 120L
         private const val DIAGNOSTIC_SNAPSHOT_DELAY_MS = 500L
+        private const val ENABLE_DIAGNOSTICS = BuildConfig.DEBUG
         private const val MAX_LOG_TEXT_LENGTH = 80
         private const val MAX_TREE_DEPTH = 5
         private const val MAX_TREE_NODE_LOGS = 80
