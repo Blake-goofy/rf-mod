@@ -20,6 +20,8 @@
 2. Turn on **Use Keyboard Toggle Service**.
 3. Tap **Allow**.
 
+> Some devices allow enabling a shortcut to the service, do **not** enable this.
+
 ### Map the Keyboard Key
 
 1. Open **Settings > Key Programmer**.
@@ -39,7 +41,7 @@
 ### Enterprise Keyboard Preferences
 
 1. Open **Settings > System > Languages and input > On-screen keyboard (Virtual keyboard)**.
-    - If any keyboard other than **Enterprise Keyboard** is enabled, tap **+ Manage keyboards**, turn off every keyboard except **Enterprise Keyboard**, then return to the **Virtual keyboard** screen.
+    - If any keyboard other than **Enterprise Keyboard** is enabled, tap **+ Manage keyboards**, turn off every keyboard except **Enterprise Keyboard**.
 2. Tap **Enterprise Keyboard > Preferences**.
 3. Set **Navigation** to **Keys**.
 4. Tap **Tab configuration**.
@@ -64,14 +66,14 @@
 13. Type 00, press ok.
 14. Go back (3 times) until you see **Rules** at the top of the screen.
 15. Tap the 3 dots in top right corner > **New rule**.
-16. Type Rule1, press ok.
+16. Type **Rule1**, press ok.
 17. Go back (2 times) until you see **Profile: Warehouse Mobile2** at the top of the screen.
 18. Open **DataWedge > Warehouse Mobile2 > Intent output Basic Data Formatting**.
 19. Disable data formatting.
 20. Open **DataWedge > Warehouse Mobile2 > Basic Data Formatting > Configure Scanner Settings > Decoders**.
 21. Enable **Interleaved 2of5**.
 
-> If you do not see the **Warehouse Mobile** profiles, launch **Warehouse Mobile**, log in, scan something, and then return to DataWedge. You do **not** need to leave admin mode to launch **Warehouse Mobile**
+> If you do not see the **Warehouse Mobile** profiles, launch **Warehouse Mobile**, log in, and then return to DataWedge. You do **not** need to leave admin mode to launch **Warehouse Mobile**
 
 ### Volume
 
